@@ -1,4 +1,9 @@
 // Mini Admin Dashboard - Main JavaScript File
+/* 
+     اسم الطالب: أحمد السيد حميده 
+    المشروع: Mini Admin Dashboard
+    إشراف: د/ ريهام اسامه
+*/
 class DashboardApp {
     constructor() {
         this.users = [];
