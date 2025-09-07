@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Admin Dashboard</title>
+    
+    <!-- CSS Libraries -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Loader -->
+    <div id="loader" class="loader">
+        <div class="loader-spinner">
+            <i class="fas fa-cog fa-spin"></i>
+            <p>جاري التحميل...</p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Mini Dashboard</span>
+        </div>
+        <div class="nav-controls">
+            <button id="themeToggle" class="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="user-profile">
+                <i class="fas fa-user-circle"></i>
+                <span>المدير</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <ul class="sidebar-menu">
+            <li class="menu-item active" data-page="dashboard">
+                <i class="fas fa-home"></i>
+                <span>الرئيسية</span>
+            </li>
+            <li class="menu-item" data-page="users">
+                <i class="fas fa-users"></i>
+                <span>المستخدمين</span>
+            </li>
+            <li class="menu-item" data-page="posts">
+                <i class="fas fa-newspaper"></i>
+                <span>المنشورات</span>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page active">
+            <div class="page-header">
+                <h1>لوحة التحكم الرئيسية</h1>
+                <p>مرحباً بك في نظام إدارة المحتوى</p>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card animate__animated animate__fadeInUp" onclick="app.showPage('users')">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="usersCount">0</h3>
+                        <p>المستخدمين</p>
+                        <small>إدارة المستخدمين</small>
+                    </div>
+                    <div class="stat-action">
+                        <i class="fas fa-arrow-left"></i>
+                    </div>
+                </div>
+                <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s" onclick="app.showPage('posts')">
+                    <div class="stat-icon">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="postsCount">0</h3>
+                        <p>المنشورات</p>
+                        <small>إدارة المحتوى</small>
+                    </div>
+                    <div class="stat-action">
+                        <i class="fas fa-arrow-left"></i>
+                    </div>
+                </div>
+                <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s" onclick="app.showCommentsStats()">
+                    <div class="stat-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="commentsCount">0</h3>
+                        <p>التعليقات</p>
+                        <small>مراجعة التعليقات</small>
+                    </div>
+                    <div class="stat-action">
+                        <i class="fas fa-arrow-left"></i>
+                    </div>
+                </div>
+                <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s" onclick="app.showFavorites()">
+                    <div class="stat-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="favoritesCount">0</h3>
+                        <p>المفضلة</p>
+                        <small>العناصر المفضلة</small>
+                    </div>
+                    <div class="stat-action">
+                        <i class="fas fa-arrow-left"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="activity-section">
+                <h2>النشاط الأخير</h2>
+                <div class="activity-list" id="recentActivity">
+                    <!-- Activity items will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Page -->
+        <div id="users" class="page">
+            <div class="page-header">
+                <div class="page-controls">
+                    <button class="btn btn-outline" id="prevUsersBtn" disabled>
+                        <i class="fas fa-chevron-right"></i>
+                        السابق
+                    </button>
+                    <h1>إدارة المستخدمين</h1>
+                    <button class="btn btn-outline" id="nextUsersBtn">
+                        التالي
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+                <button class="btn btn-primary" id="addUserBtn">
+                    <i class="fas fa-plus"></i>
+                    إضافة مستخدم
+                </button>
+            </div>
+
+            <div class="table-container">
+                <!-- Table Controls -->
+                <div class="table-controls">
+                    <div class="table-info">
+                        <span id="tableInfo">عرض 1 إلى 10 من 10 عناصر</span>
+                    </div>
+                    <div class="table-actions">
+                        <button class="btn btn-sm btn-outline" id="refreshUsersBtn" title="تحديث">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline" id="exportUsersBtn" title="تصدير">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <table id="usersTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>المعرف</th>
+                            <th>الاسم</th>
+                            <th>اسم المستخدم</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>الهاتف</th>
+                            <th>الموقع</th>
+                            <th>المفضلة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Users data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+  </div>
+
+        <!-- Posts Page -->
+        <div id="posts" class="page">
+            <div class="page-header">
+                <div class="page-controls">
+                    <button class="btn btn-outline" id="prevPostsBtn" disabled>
+                        <i class="fas fa-chevron-right"></i>
+                        السابق
+                    </button>
+                    <h1>إدارة المنشورات</h1>
+                    <button class="btn btn-outline" id="nextPostsBtn">
+                        التالي
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+                <button class="btn btn-primary" id="addPostBtn">
+                    <i class="fas fa-plus"></i>
+                    إضافة منشور
+                </button>
+            </div>
+
+            <!-- Search and Filters -->
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="postSearch" placeholder="البحث في المنشورات...">
+                </div>
+                <div class="filter-controls">
+                    <select id="postFilter" class="filter-select">
+                        <option value="all">جميع المنشورات</option>
+                        <option value="recent">الأحدث</option>
+                        <option value="favorites">المفضلة فقط</option>
+                    </select>
+                    <button class="btn btn-sm btn-outline" id="refreshPostsBtn" title="تحديث">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Posts Grid -->
+            <div class="posts-grid" id="postsGrid">
+                <!-- Posts will be loaded here -->
+            </div>
+
+            <!-- Posts Pagination -->
+            <div class="pagination-container" id="postsPagination">
+                <div class="pagination-info">
+                    <span id="postsInfo">عرض 1 إلى 12 من 100 منشور</span>
+                </div>
+                <div class="pagination-controls">
+                    <button class="btn btn-sm btn-outline" id="prevPostsBtn" disabled>
+                        <i class="fas fa-chevron-right"></i> السابق
+                    </button>
+                    <div class="pagination-pages" id="postsPages">
+                        <!-- Page numbers will be generated here -->
+                    </div>
+                    <button class="btn btn-sm btn-outline" id="nextPostsBtn">
+                        التالي <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Favorites Page -->
+        <div id="favorites" class="page">
+            <div class="page-header">
+                <div class="page-controls">
+                    <button class="btn btn-outline" id="prevFavoritesBtn" disabled>
+                        <i class="fas fa-chevron-right"></i>
+                        السابق
+                    </button>
+                    <h1>العناصر المفضلة</h1>
+                    <button class="btn btn-outline" id="nextFavoritesBtn">
+                        التالي
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+                <div class="favorites-stats">
+                    <span class="badge" id="favoritesBadge">0 عنصر</span>
+                </div>
+            </div>
+
+            <!-- Favorites Tabs -->
+            <div class="favorites-tabs">
+                <button class="tab-btn active" data-tab="users">المستخدمين المفضلين</button>
+                <button class="tab-btn" data-tab="posts">المنشورات المفضلة</button>
+            </div>
+
+            <!-- Favorites Content -->
+            <div class="favorites-content">
+                <!-- Users Favorites -->
+                <div id="favoritesUsers" class="favorites-tab-content active">
+                    <div class="favorites-grid" id="favoritesUsersGrid">
+                        <!-- Favorite users will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Posts Favorites -->
+                <div id="favoritesPosts" class="favorites-tab-content">
+                    <div class="favorites-grid" id="favoritesPostsGrid">
+                        <!-- Favorite posts will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="userModalTitle">إضافة مستخدم</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId">
+                    <div class="form-group">
+                        <label for="userName">الاسم</label>
+                        <input type="text" id="userName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userUsername">اسم المستخدم</label>
+                        <input type="text" id="userUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userEmail">البريد الإلكتروني</label>
+                        <input type="email" id="userEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userPhone">الهاتف</label>
+                        <input type="tel" id="userPhone">
+                    </div>
+                    <div class="form-group">
+                        <label for="userWebsite">الموقع</label>
+                        <input type="url" id="userWebsite">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelUserBtn">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="saveUserBtn">حفظ</button>
+            </div>
+    </div>
+    </div>
+
+    <!-- Post Modal -->
+  <div id="postModal" class="modal">
+    <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="postModalTitle">إضافة منشور</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="postForm">
+                    <input type="hidden" id="postId">
+                    <div class="form-group">
+                        <label for="postTitle">عنوان المنشور</label>
+                        <input type="text" id="postTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="postBody">محتوى المنشور</label>
+                        <textarea id="postBody" rows="5" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelPostBtn">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="savePostBtn">حفظ</button>
+      </div>
+    </div>
+  </div>
+
+    <!-- Comments Modal -->
+    <div id="commentsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>تعليقات المنشور</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="commentsList">
+                    <!-- Comments will be loaded here -->
+                </div>
+          </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="assets/js/app.js"></script>
+</body>
+</html>رات
